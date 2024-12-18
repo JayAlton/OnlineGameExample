@@ -28,6 +28,7 @@ wsServer.on("request", request => {
             games[gameID] = {
                 "id": gameID,
                 "chips": 2000,
+                "clients": []
             }
 
             const payLoad = {
@@ -44,7 +45,24 @@ wsServer.on("request", request => {
             const gameID = response.gameID;
             const game = games[gameID];
             const amtOfChips = response.amtOfChips;
+            if (game.clients.length >= 3){
+                //Max players reached
+                return;
+            }
+            const color = {"0": "Red", "1": "Green", "2": "Blue"}[game.clients.length]
+            game.clients.push({
+                "clientID": clientID,
+                "color": color
+            })
 
+            const payLoad = {
+                "method": "join",
+                "game": game
+            }
+            //loop through all clients and tell them that people have joined
+            game.clients.forEach(c => {
+                clients[c.clientID.connection.send(JSON.stringify(payLoad))]
+            })
         }
     })
 
