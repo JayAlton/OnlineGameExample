@@ -7,6 +7,7 @@ const httpServer = http.createServer();
 httpServer.listen(9090, () => console.log("Listening on 9090"))
 //hashmap
 const clients = {};
+const games = {};
 
 const wsServer = new websocketServer({
     "httpServer": httpServer
@@ -19,7 +20,32 @@ wsServer.on("request", request => {
     connection.on("message", message => {
         const result = JSON.parse(message.utf8Data)
         //Received Msg from client
-        console.log(result)
+        
+        // user creates a new game
+        if (result.method === "create") {
+            const clientID = result.clientID;
+            const gameID = guid();
+            games[gameID] = {
+                "id": gameID,
+                "chips": 2000,
+            }
+
+            const payLoad = {
+                "method": "create",
+                "game" : games[gameID]
+            }
+
+            const con = clients[clientID].connection;
+            con.send(JSON.stringify(payLoad));
+        }
+
+        if (result.method === "join") {
+            const clientID = response.clientID;
+            const gameID = response.gameID;
+            const game = games[gameID];
+            const amtOfChips = response.amtOfChips;
+
+        }
     })
 
     //generate a new clientID

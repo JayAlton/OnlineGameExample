@@ -7,12 +7,53 @@
 </head>
 <body>
     <h1>Poker</h1>
+    <button id = "btnCreate">New Game</button>
+    <button id = 'btnJoin'>Join Game</button>
+    <label>Game ID: </label>
+    <input type = 'text' id = 'txtGameID'>
+    <label>Amount of Chips: </label>
+    <input type = 'text' id = 'amtOfChips'>
     <script>
+        //HTML elements
+        const btnCreate = document.getElementById("btnCreate");
+        const btnJoin = document.getElementById("btnJoin");
+        const txtGameID = document.getElementById("txtGameID");
+        const amtOfChips = document.getElementById("amtOfChips");
+
+        //wiring events
+        btnCreate.addEventListener("click", e => {
+
+            if (gameID === null)
+                gameID = txtGameID.value;
+
+            if(amtOfChips === null)
+                amtOfChips = amtOfChips.value;
+            
+            const payLoad = {
+                "method": "create",
+                "clientID": clientID,
+                "gameID": gameID,
+                "amtOfChips": amtOfChips
+            }
+
+            ws.send(JSON.stringify(payLoad));
+
+        })
+        let clientID = null;
         let ws = new WebSocket("ws://localhost:9090")
         ws.onmessage = message => {
             //message.data
             const response = JSON.parse(message.data);
             console.log(response);
+            if (response.method === "connect"){
+                clientID = response.clientID;
+                console.log("Client ID set successfully: "  + clientID);
+            }
+
+            if (response.method === "create"){
+                clientID = clientID;
+                console.log("Game Successfully created with ID: " + response.game.id + " with " + response.game.chips + " chips");
+            }
         }
     </script>
 </body>
